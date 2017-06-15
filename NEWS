@@ -1,6 +1,10 @@
 Noteworthy changes in release ?.? (????-??-??)
 ==============================================
 
+* New tools
+  * Added asinfo tool that is purposed to provide information about
+    system calls and architectures.
+
 * Improvements
   * Implemented -DD and -DDD options that move strace into a separate
     process group and session, respectively.
