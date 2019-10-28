@@ -244,7 +244,7 @@ run_kvm(const int vcpu_fd, struct kvm_run *const run, const size_t mmap_size,
 					   run->fail_entry.hardware_entry_failure_reason);
 
 		default:
-			error_msg_and_fail("exit_reason = %#x",
+			error_msg_and_skip("exit_reason = %#x",
 					   run->exit_reason);
 		}
 	}
