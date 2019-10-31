@@ -23,7 +23,9 @@ git checkout -f "$id"
 
 ./bootstrap
 
-./configure --enable-maintainer-mode
+#exit
+
+./configure --enable-maintainer-mode --enable-mpers=no
 
 make -s $j distcheck
 

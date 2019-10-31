@@ -2693,6 +2693,37 @@ next_event_exit:
 	return tcb_wait_tab + tcp->wait_data_idx;
 }
 
+static int decode_drm_radeon_gem_create_args(struct tcb *tcp, kernel_ulong_t args)
+{
+	struct drm_radeon_gem_create {
+        	__u64   size;
+        	__u64   alignment;
+        	__u32   handle;
+        	__u32   initial_domain;
+        	__u32   flags;
+	};
+	struct drm_radeon_gem_create arg;
+	umoven(tcp, args, sizeof(arg), &arg);
+	tprintf("size=0x%lx alignment=0x%lx handle=0x%x initial_domain=0x%x flags=0x%x\n", arg.size, arg.alignment, arg.handle, arg.initial_domain, arg.flags);
+	return 0;
+}
+
+//DRM_IOCTL_GEM_CLOSE
+static int decode_drm_ioctl_close_args(struct tcb *tcp, kernel_ulong_t args)
+{
+	/** DRM_IOCTL_GEM_CLOSE ioctl argument type */
+	struct drm_gem_close {
+        	/** Handle of the object to be closed. */
+        	__u32 handle;
+        	__u32 pad;
+	};
+
+	struct drm_gem_close arg;
+	umoven(tcp, args, sizeof(arg), &arg);
+	tprintf("handle=0x%x\n", arg.handle);
+	return 0;
+}
+
 static int
 trace_syscall(struct tcb *tcp, unsigned int *sig)
 {
@@ -2702,6 +2733,14 @@ trace_syscall(struct tcb *tcp, unsigned int *sig)
 		case 0:
 			return 0;
 		case 1:
+			if (tcp->u_arg[1] == 0xc020645d) {
+				tprintf("ioctl DRM_IOCTL_RADEON_GEM_CREATE input args: ");
+				decode_drm_radeon_gem_create_args(tcp, tcp->u_arg[2]);
+			}
+			if (tcp->u_arg[1] == 0x40086409) {
+				tprintf("ioctl DRM_IOCTL_GEM_CLOSE input args: ");
+				decode_drm_ioctl_close_args(tcp, tcp->u_arg[2]);
+			}
 			res = syscall_entering_trace(tcp, sig);
 		}
 		syscall_entering_finish(tcp, res);
@@ -2713,6 +2752,10 @@ trace_syscall(struct tcb *tcp, unsigned int *sig)
 			res = syscall_exiting_trace(tcp, &ts, res);
 		}
 		syscall_exiting_finish(tcp);
+		if (tcp->u_arg[1] == 0xc020645d) {
+			tprintf("ioctl DRM_IOCTL_RADEON_GEM_CREATE output args: ");
+			decode_drm_radeon_gem_create_args(tcp, tcp->u_arg[2]);
+		}
 		return res;
 	}
 }
